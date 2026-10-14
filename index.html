@@ -1,0 +1,899 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#111416">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="يومي">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>يومي</title>
+<style>
+:root{
+  --bg:#111416; --card:#1a1f22; --card2:#222a2e; --line:#2c3539;
+  --ink:#eef1f0; --ink2:#a9b3b1; --ink3:#6f7b79;
+  --accent:#3fb39a; --accent-ink:#06231d; --warn:#e0a24a; --bad:#d97a6c; --good:#5fc28f;
+  --radius:18px;
+}
+:root[data-theme="light"]{
+  --bg:#f4f3ef; --card:#ffffff; --card2:#f0eee8; --line:#e2dfd6;
+  --ink:#1b1f1e; --ink2:#535c5a; --ink3:#8b9391;
+  --accent:#23856f; --accent-ink:#ffffff; --warn:#a96d12; --bad:#b14b3c; --good:#2b8a57;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink)}
+body{font-family:"Segoe UI",Tahoma,"Noto Sans Arabic","Geeza Pro",system-ui,sans-serif;font-size:16px;line-height:1.6;
+  padding:env(safe-area-inset-top) 0 calc(78px + env(safe-area-inset-bottom));min-height:100vh}
+button,input,select,textarea{font:inherit;color:inherit}
+.wrap{max-width:560px;margin:0 auto;padding:16px}
+h1{font-size:22px;margin:4px 0 12px}
+h2{font-size:17px;margin:20px 0 10px;color:var(--ink2);font-weight:600}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+.muted{color:var(--ink2)} .faint{color:var(--ink3);font-size:14px}
+.row{display:flex;gap:8px;align-items:center}
+.row.wrap2{flex-wrap:wrap}
+.spread{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.btn{border:0;border-radius:14px;padding:14px 16px;background:var(--card2);color:var(--ink);font-weight:600;cursor:pointer;min-height:50px}
+.btn.primary{background:var(--accent);color:var(--accent-ink)}
+.btn.ghost{background:transparent;border:1px solid var(--line)}
+.btn.small{min-height:38px;padding:8px 12px;font-size:14px;border-radius:12px}
+.btn.danger{color:var(--bad)}
+.btn:disabled{opacity:.45}
+.grow{flex:1}
+.chip{display:inline-block;font-size:12px;padding:2px 10px;border-radius:99px;background:var(--card2);color:var(--ink2)}
+.banner{border-radius:14px;padding:12px 14px;margin-bottom:12px;background:var(--card2);border-inline-start:4px solid var(--warn)}
+.banner.good{border-color:var(--good)}
+.banner .btn{background:var(--card);border:1px solid var(--line);margin-top:6px}
+.banner .btn.primary{background:var(--accent);border-color:var(--accent)}
+input[type=text],input[type=number],input[type=time],input[type=date],input[type=url],select,textarea{
+  width:100%;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-height:44px}
+textarea{min-height:70px;resize:vertical}
+label.f{display:block;margin:10px 0 4px;color:var(--ink2);font-size:14px}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+input,select,textarea{min-width:0;max-width:100%}
+input[type=time]{padding-inline:8px}
+
+/* today hero */
+.hero{display:flex;flex-direction:column;align-items:center;text-align:center;padding:20px 16px}
+.ring{position:relative;width:220px;height:220px;margin:6px auto 10px}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring .bgc{stroke:var(--card2)} .ring .fgc{transition:stroke-dashoffset 1s linear}
+.ring .center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px}
+.ring .title{font-size:22px;font-weight:700;line-height:1.3}
+.ring .time{font-size:14px;color:var(--ink2);direction:ltr}
+.ring .left{font-size:28px;font-weight:700;margin-top:4px}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;margin-top:6px}
+.actions .wide{grid-column:1/-1}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;text-align:center}
+.stat b{display:block;font-size:22px}
+.stat span{font-size:12px;color:var(--ink2)}
+
+/* block list */
+.blk{display:flex;gap:10px;align-items:stretch;padding:10px 0;border-bottom:1px solid var(--line)}
+.blk:last-child{border-bottom:0}
+.blk .bar{width:5px;border-radius:4px;flex:none}
+.blk .tm{width:70px;flex:none;color:var(--ink2);font-size:14px}
+.blk .nm{flex:1;min-width:0}
+.blk .nm b{display:block}
+.blk .btn{align-self:center}
+.blk.now{background:linear-gradient(270deg,rgba(63,179,154,.10),transparent)}
+.st{font-size:12px;padding:2px 8px;border-radius:99px;white-space:nowrap;align-self:center}
+.st.done{background:rgba(95,194,143,.15);color:var(--good)}
+.st.partial{background:rgba(224,162,74,.15);color:var(--warn)}
+.st.skipped,.st.missed{background:rgba(217,122,108,.12);color:var(--bad)}
+.st.moved{background:var(--card2);color:var(--ink2)}
+
+/* progress bars */
+.pbar{height:10px;background:var(--card2);border-radius:99px;overflow:hidden}
+.pbar i{display:block;height:100%;background:var(--accent);border-radius:99px;width:0;transition:width .8s ease}
+.goalrow{margin:10px 0}
+
+/* nav */
+nav.tabs{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--line);
+  display:grid;grid-template-columns:repeat(5,1fr);padding:6px 4px calc(6px + env(safe-area-inset-bottom));z-index:10}
+nav.tabs button{background:none;border:0;color:var(--ink3);display:flex;flex-direction:column;align-items:center;gap:2px;font-size:12px;padding:6px 0;cursor:pointer}
+nav.tabs button svg{width:24px;height:24px}
+nav.tabs button.on{color:var(--accent)}
+.view{display:none;animation:fade .25s ease}
+.view.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* focus overlay */
+#focus{position:fixed;inset:0;background:#07090a;color:#eef1f0;z-index:50;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px}
+#focus.on{display:flex}
+#focus .ftitle{font-size:26px;font-weight:700;margin-bottom:8px}
+#focus .fleft{font-size:56px;font-weight:700;direction:ltr;letter-spacing:2px}
+#focus .breath{width:220px;height:220px;border-radius:50%;border:2px solid rgba(63,179,154,.5);display:flex;align-items:center;justify-content:center;margin:20px 0;animation:breath 8s ease-in-out infinite}
+@keyframes breath{0%,100%{transform:scale(.92);border-color:rgba(63,179,154,.35)}50%{transform:scale(1.04);border-color:rgba(63,179,154,.8)}}
+#focus .tip{color:#8a9593;margin-bottom:24px}
+#focus .btn{background:#1a1f22;color:#eef1f0;min-width:200px}
+
+dialog{border:0;border-radius:20px;background:var(--card);color:var(--ink);padding:18px;width:min(92vw,480px);max-height:88vh;overflow:auto}
+dialog::backdrop{background:rgba(0,0,0,.6)}
+.toast{position:fixed;bottom:calc(90px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;z-index:60;font-size:14px;opacity:0;transition:opacity .3s;pointer-events:none;max-width:90vw;text-align:center}
+.toast.on{opacity:1}
+.burst{position:fixed;pointer-events:none;z-index:70;font-weight:700;color:var(--accent);font-size:22px;animation:up 1.1s ease forwards}
+@keyframes up{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-60px)}}
+.daychips{display:flex;gap:6px;flex-wrap:wrap}
+.daychips label{display:flex;align-items:center;gap:4px;background:var(--card2);border-radius:10px;padding:6px 10px;font-size:14px}
+.diff.up{color:var(--good)} .diff.down{color:var(--bad)}
+table.res{width:100%;border-collapse:collapse;font-size:15px}
+table.res td{padding:8px 4px;border-bottom:1px solid var(--line);vertical-align:top}
+table.res td:last-child{text-align:left}
+.bars7{display:flex;align-items:flex-end;gap:6px;height:90px;margin-top:8px}
+.bars7 div{flex:1;height:100%;background:var(--card2);border-radius:6px 6px 2px 2px;position:relative;overflow:hidden}
+.bars7 div i{position:absolute;bottom:0;left:0;right:0;background:var(--accent);height:0;transition:height .8s ease}
+.bars7lbl{display:flex;gap:6px;font-size:11px;color:var(--ink3)}
+.bars7lbl span{flex:1;text-align:center}
+details summary{cursor:pointer}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+:root[data-motion="off"] *{animation:none!important;transition:none!important}
+</style>
+</head>
+<body>
+
+<main class="wrap">
+  <section class="view on" id="v-today"></section>
+  <section class="view" id="v-schedule"></section>
+  <section class="view" id="v-cycle"></section>
+  <section class="view" id="v-progress"></section>
+  <section class="view" id="v-settings"></section>
+</main>
+
+<nav class="tabs" id="tabs">
+  <button data-v="today" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>اليوم</button>
+  <button data-v="schedule"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg>الجدول</button>
+  <button data-v="cycle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.4 6.8 19.1l1-5.8L3.5 9.2l5.9-.9z"/></svg>الدورة</button>
+  <button data-v="progress"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 20V11M12 20V5M19 20v-6"/></svg>التقدم</button>
+  <button data-v="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>الإعدادات</button>
+</nav>
+
+<div id="focus" role="dialog" aria-modal="true">
+  <div class="ftitle" id="f-title"></div>
+  <div id="f-mode" style="color:#8a9593"></div>
+  <div class="breath"><div class="fleft" id="f-left">00:00</div></div>
+  <div class="tip">ضع الموبايل بعيداً، وخلي بس هذي الشاشة.</div>
+  <button class="btn" id="f-end">إنهاء الجلسة</button>
+</div>
+
+<dialog id="dlg"></dialog>
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+/* ========== helpers ========== */
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad = n => String(n).padStart(2, '0');
+const toMin = t => { const [h, m] = String(t).split(':').map(Number); return h * 60 + m; };
+const fromMin = m => { m = ((m % 1440) + 1440) % 1440; return pad(Math.floor(m / 60)) + ':' + pad(m % 60); };
+const dateKey = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+const parseKey = k => { const [y, m, d] = k.split('-').map(Number); return new Date(y, m - 1, d); };
+const addDays = (k, n) => { const d = parseKey(k); d.setDate(d.getDate() + n); return dateKey(d); };
+const daysBetween = (a, b) => Math.round((parseKey(b) - parseKey(a)) / 864e5);
+const nowMin = () => { const d = new Date(); return d.getHours() * 60 + d.getMinutes(); };
+const todayKey = () => dateKey(new Date());
+const DAY_NAMES = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+const DAY_SHORT = ['أحد','اثنين','ثلاثاء','أربعاء','خميس','جمعة','سبت'];
+const DAY_ORDER = [6,0,1,2,3,4,5]; // week starts Saturday
+const fmt12 = t => { const m = toMin(t); let h = Math.floor(m / 60); const mi = m % 60; const ap = h < 12 ? 'ص' : 'م'; h = h % 12 || 12; return h + ':' + pad(mi) + ' ' + ap; };
+const fmtDur = min => { min = Math.max(0, Math.round(min)); const h = Math.floor(min / 60), m = min % 60; return h ? (m ? `${h} س ${m} د` : `${h} س`) : `${m} د`; };
+const fmtDate = k => parseKey(k).toLocaleDateString('ar-IQ-u-nu-latn', { day: 'numeric', month: 'long' });
+const GOALS = { gym: 'جيم', claude: 'كلاود', projects: 'مشاريع', reading: 'قراءة' };
+const TYPES = { gym: 'هدف: جيم', claude: 'هدف: كلاود', projects: 'هدف: مشاريع', reading: 'هدف: قراءة', flex: 'وقت مرن', fixed: 'التزام ثابت', none: 'روتين' };
+const isGoal = b => !!(b && GOALS[b.goal]);
+const counted = l => !!(l && (l.status === 'done' || l.status === 'partial'));
+
+/* ========== storage (IndexedDB with localStorage fallback) ========== */
+const DB = {
+  db: null,
+  async open() {
+    if (!('indexedDB' in window)) return;
+    this.db = await new Promise(res => {
+      try {
+        const r = indexedDB.open('yawmi', 1);
+        r.onupgradeneeded = () => r.result.createObjectStore('kv');
+        r.onsuccess = () => res(r.result);
+        r.onerror = () => res(null);
+      } catch { res(null); }
+    });
+  },
+  async get(k) {
+    if (this.db) return new Promise(res => { const t = this.db.transaction('kv').objectStore('kv').get(k); t.onsuccess = () => res(t.result); t.onerror = () => res(undefined); });
+    try { const v = localStorage.getItem('yawmi:' + k); return v ? JSON.parse(v) : undefined; } catch { return undefined; }
+  },
+  async set(k, v) {
+    const plain = JSON.parse(JSON.stringify(v));
+    if (this.db) return new Promise(res => { const t = this.db.transaction('kv', 'readwrite'); t.objectStore('kv').put(plain, k); t.oncomplete = res; t.onerror = res; });
+    try { localStorage.setItem('yawmi:' + k, JSON.stringify(plain)); } catch {}
+  }
+};
+
+/* ========== default state ========== */
+const ALL = [0,1,2,3,4,6];
+function defaultState() {
+  return {
+    version: 1,
+    createdAt: todayKey(),
+    blocks: [
+      { id: 'b_gym', title: 'جيم', goal: 'gym', start: '05:15', end: '06:30', days: [6,0,2,4], color: '#2e7d6f' },
+      { id: 'b_bf', title: 'دوش وفطور', goal: 'none', start: '06:30', end: '07:30', days: [...ALL], color: '#5b6b7a' },
+      { id: 'b_claude', title: 'دراسة كلاود', goal: 'claude', start: '07:30', end: '09:30', days: [...ALL], color: '#c96f3b' },
+      { id: 'b_break', title: 'استراحة', goal: 'none', start: '09:30', end: '10:00', days: [...ALL], color: '#5b6b7a' },
+      { id: 'b_proj', title: 'المشاريع', goal: 'projects', start: '10:00', end: '12:30', days: [...ALL], color: '#3f6fb5' },
+      { id: 'b_lunch', title: 'صلاة وغدا وراحة', goal: 'none', start: '12:30', end: '13:30', days: [...ALL], color: '#5b6b7a' },
+      { id: 'b_read', title: 'قراءة', goal: 'reading', start: '13:30', end: '14:30', days: [...ALL], color: '#8a5cb8' },
+      { id: 'b_flex', title: 'وقت مرن', goal: 'flex', start: '14:30', end: '16:00', days: [...ALL], color: '#6b8f3a' },
+      { id: 'b_fixed', title: 'التزامات ثابتة', goal: 'fixed', start: '16:00', end: '21:00', days: [...ALL], color: '#46505a' },
+      { id: 'b_dinner', title: 'عشا ووقت حر', goal: 'none', start: '21:00', end: '22:00', days: [...ALL], color: '#5b6b7a' },
+      { id: 'b_sleep', title: 'تجهيز النوم', goal: 'none', start: '22:00', end: '22:15', days: [...ALL], color: '#5b6b7a' }
+    ],
+    logs: {},      // { date: { blockId: { status, startedAt, minutes, movedTo } } }
+    days: {},      // { date: { mode: 'normal' | 'light' } }
+    sleep: {},     // { date-of-waking: { bed, wake } }
+    cycles: [],
+    books: [],
+    projects: [],
+    notes: [],
+    active: null,  // running timer
+    settings: {
+      theme: 'dark', sound: true, motion: true,
+      bedtime: '22:15', wakeGym: '05:00', wakeOther: '06:00', sleepReminder: '21:45',
+      restDay: 5, graceDaysPerWeek: 1, weekStart: 6, cycleDays: 14,
+      calendarExportedAt: null, scheduleChangedAt: null,
+      weeklyGoals: { gym: 4, claude: 6, projects: 6, reading: 6 }
+    }
+  };
+}
+let S;
+const save = () => DB.set('state', S);
+
+/* ========== schedule logic ========== */
+function blocksFor(k) {
+  const dow = parseKey(k).getDay();
+  const logs = S.logs[k] || {};
+  return S.blocks.filter(b => b.days.includes(dow)).map(b => {
+    const l = logs[b.id];
+    const dur = toMin(b.end) - toMin(b.start);
+    const s = l && l.movedTo ? toMin(l.movedTo) : toMin(b.start);
+    return { ...b, dur, s, e: s + dur, log: l };
+  }).sort((a, b) => a.s - b.s || (isGoal(b) ? 1 : 0) - (isGoal(a) ? 1 : 0));
+}
+function currentAndNext(k, m) {
+  const list = blocksFor(k);
+  const cur = list.filter(b => b.s <= m && m < b.e).sort((a, b) => (isGoal(b) ? 1 : 0) - (isGoal(a) ? 1 : 0))[0] || null;
+  const next = list.find(b => b.s > m && b !== cur) || null;
+  return { list, cur, next };
+}
+function blockPoints(b) {
+  const l = b.log; if (!l) return 0;
+  let p = l.status === 'done' ? 10 : l.status === 'partial' ? 4 : 0;
+  // on-time bonus only when started near the block's original time, not after moving it
+  if (p && l.startedAt && !l.movedTo && Math.abs(toMin(l.startedAt) - toMin(b.start)) <= 10) p += 2;
+  return p;
+}
+function goalCountDone(k) { return blocksFor(k).filter(b => isGoal(b) && counted(b.log)).length; }
+const isRestDay = k => parseKey(k).getDay() === S.settings.restDay;
+function dayQualifies(k) {
+  const need = (S.days[k] && S.days[k].mode === 'light') ? 1 : 2;
+  return goalCountDone(k) >= need;
+}
+function weekKey(k) { const d = parseKey(k); const back = (d.getDay() - S.settings.weekStart + 7) % 7; d.setDate(d.getDate() - back); return dateKey(d); }
+function computeStreak() {
+  const today = todayKey(); let streak = 0, k = today; const grace = {};
+  for (let i = 0; i < 1000 && k >= S.createdAt; i++) {
+    if (!isRestDay(k)) {
+      if (dayQualifies(k)) streak++;
+      else if (k !== today) { const wk = weekKey(k); grace[wk] = (grace[wk] || 0) + 1; if (grace[wk] > S.settings.graceDaysPerWeek) break; }
+    }
+    k = addDays(k, -1);
+  }
+  return streak;
+}
+function bestStreak() {
+  let best = 0, run = 0, k = S.createdAt; const today = todayKey(); const grace = {};
+  for (let i = 0; i < 2000 && k <= today; i++) {
+    if (!isRestDay(k)) {
+      if (dayQualifies(k)) { run++; best = Math.max(best, run); }
+      else if (k !== today) { const wk = weekKey(k); grace[wk] = (grace[wk] || 0) + 1; if (grace[wk] > S.settings.graceDaysPerWeek) run = 0; }
+    }
+    k = addDays(k, 1);
+  }
+  return best;
+}
+function totalPoints() { let p = 0; for (const k of Object.keys(S.logs)) for (const b of blocksFor(k)) p += blockPoints(b); return p; }
+function setLog(k, id, patch) {
+  S.logs[k] = S.logs[k] || {};
+  const cur = { ...(S.logs[k][id] || {}), ...patch };
+  Object.keys(cur).forEach(x => cur[x] === undefined && delete cur[x]);
+  S.logs[k][id] = cur; save();
+}
+function markSchedChanged() { S.settings.scheduleChangedAt = new Date().toISOString(); save(); }
+const gymToday = () => S.blocks.some(b => b.goal === 'gym' && b.days.includes(new Date().getDay()));
+
+/* ========== cycle ========== */
+const currentCycle = () => S.cycles.find(c => !c.closed) || null;
+function sleepHours(s) { let d = toMin(s.wake) - toMin(s.bed); if (d <= 0) d += 1440; return d / 60; }
+function cycleCompliance(c) {
+  let sched = 0, done = 0; const end = c.end < todayKey() ? c.end : todayKey(); const sl = [];
+  for (let k = c.start; k <= end; k = addDays(k, 1)) {
+    if (S.sleep[k]) sl.push(sleepHours(S.sleep[k]));
+    if (isRestDay(k)) continue;
+    // today: only blocks already done or already over count toward the rate
+    for (const b of blocksFor(k)) if (isGoal(b)) { if (k === todayKey() && !counted(b.log) && b.e > nowMin()) continue; sched++; if (counted(b.log)) done++; }
+  }
+  return { pct: sched ? Math.round(done / sched * 100) : 0, done, sched, sleep: sl.length ? sl.reduce((a, b) => a + b, 0) / sl.length : null };
+}
+
+/* ========== sound / vibrate / wake lock ========== */
+let actx;
+function beep(pattern = [0, 0.35, 0.7]) {
+  if (S.settings.sound) {
+    try {
+      actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+      pattern.forEach(t => {
+        const o = actx.createOscillator(), g = actx.createGain();
+        o.type = 'sine'; o.frequency.value = 660;
+        g.gain.setValueAtTime(0.0001, actx.currentTime + t);
+        g.gain.exponentialRampToValueAtTime(0.3, actx.currentTime + t + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime + t + 0.3);
+        o.connect(g).connect(actx.destination); o.start(actx.currentTime + t); o.stop(actx.currentTime + t + 0.32);
+      });
+    } catch {}
+  }
+  try { navigator.vibrate && navigator.vibrate(pattern.length > 1 ? [300, 150, 300] : 60); } catch {}
+}
+let wakeLock = null;
+async function lockScreen() { try { if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); } catch {} }
+function unlockScreen() { try { wakeLock && wakeLock.release(); } catch {} wakeLock = null; }
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && S) { if (S.active) lockScreen(); tick(); render(); } });
+
+/* ========== UI basics ========== */
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('on'), 2600); }
+function burst(text, el) {
+  if (S.settings.motion === false) return;
+  const r = el ? el.getBoundingClientRect() : { left: innerWidth / 2, top: innerHeight / 2, width: 0 };
+  const b = document.createElement('div'); b.className = 'burst'; b.textContent = text;
+  b.style.left = (r.left + r.width / 2 - 20) + 'px'; b.style.top = (r.top - 10) + 'px';
+  document.body.appendChild(b); setTimeout(() => b.remove(), 1200);
+}
+let view = 'today';
+function go(v) {
+  view = v;
+  document.querySelectorAll('.view').forEach(s => s.classList.toggle('on', s.id === 'v-' + v));
+  document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+  render(); scrollTo(0, 0);
+}
+$('#tabs').addEventListener('click', e => { const b = e.target.closest('button'); if (b) go(b.dataset.v); });
+const dlg = $('#dlg');
+function openDlg(html, onMount) { dlg.innerHTML = html; if (!dlg.open) dlg.showModal(); onMount && onMount(dlg); }
+function closeDlg() { if (dlg.open) dlg.close(); }
+dlg.addEventListener('click', e => { if (e.target === dlg) closeDlg(); });
+
+function render() {
+  document.documentElement.dataset.theme = S.settings.theme;
+  document.documentElement.dataset.motion = S.settings.motion === false ? 'off' : 'on';
+  ({ today: renderToday, schedule: renderSchedule, cycle: renderCycle, progress: renderProgress, settings: renderSettings })[view]();
+}
+
+/* ========== TODAY ========== */
+function statusLabel(s) { return { done: 'أنجزت', partial: 'جزئي', skipped: 'تخطيت', missed: 'فات' }[s] || ''; }
+function renderToday() {
+  const k = todayKey(), m = nowMin(), d = new Date();
+  let html = `<div class="spread"><h1>${DAY_NAMES[d.getDay()]}</h1><span class="faint">${fmtDate(k)}</span></div>`;
+
+  const yk = addDays(k, -1);
+  if (yk >= S.createdAt && !isRestDay(yk) && !dayQualifies(yk) && !isRestDay(k))
+    html += `<div class="banner">أمس فات، وهذا عادي. ابدأ اليوم ببلوك واحد، 10 دقائق بس.</div>`;
+  const cyc = currentCycle();
+  if (!cyc) html += `<div class="banner good">ما عندك دورة شغالة. حدد شنو لازم يطلع منك بالـ14 يوم الجاية. <button class="btn small primary" data-go="cycle">ابدأ دورة</button></div>`;
+  else if (k >= cyc.end) html += `<div class="banner good"><b>اليوم يوم النتيجة.</b> شوف شنو طلع منك بالدورة. <button class="btn small primary" data-go="cycle">افتح النتيجة</button></div>`;
+  if (S.settings.scheduleChangedAt && (!S.settings.calendarExportedAt || S.settings.scheduleChangedAt > S.settings.calendarExportedAt))
+    html += `<div class="banner">الجدول تغيّر، والإشعارات بتقويمك قديمة. <button class="btn small" data-act="ics">صدّر التقويم</button></div>`;
+  else if (!S.settings.calendarExportedAt)
+    html += `<div class="banner">حتى توصلك إشعارات البلوكات والتطبيق مسكّر، صدّر ملف التقويم مرة وحدة. <button class="btn small" data-act="ics">صدّر التقويم</button></div>`;
+
+  const todayPts = blocksFor(k).reduce((a, b) => a + blockPoints(b), 0);
+  html += `<div class="stats">
+    <div class="stat"><b>${computeStreak()}</b><span>سلسلة الأيام</span></div>
+    <div class="stat"><b>${todayPts}</b><span>نقاط اليوم</span></div>
+    <div class="stat"><b>${cyc ? Math.max(0, daysBetween(k, cyc.end)) : '-'}</b><span>يوم للنتيجة</span></div>
+  </div>`;
+
+  if (isRestDay(k)) {
+    html += `<div class="card hero"><h2 style="margin:6px 0">${DAY_NAMES[S.settings.restDay]} حرة</h2><p class="muted">يوم راحة، ما يأثر على السلسلة. ارتاح زين حتى تبدي الأسبوع قوي.</p></div>`;
+  } else {
+    const { list, cur, next } = currentAndNext(k, m);
+    const light = S.days[k] && S.days[k].mode === 'light';
+    if (cur) {
+      const left = cur.e - m, frac = Math.min(1, Math.max(0, (m - cur.s) / cur.dur));
+      const C = 2 * Math.PI * 96, st = cur.log && cur.log.status;
+      html += `<div class="card hero">
+        <span class="chip">${esc(TYPES[cur.goal] || '')}</span>
+        <div class="ring">
+          <svg viewBox="0 0 220 220"><circle class="bgc" cx="110" cy="110" r="96" fill="none" stroke-width="12"/>
+          <circle class="fgc" cx="110" cy="110" r="96" fill="none" stroke="${esc(cur.color)}" stroke-width="12" stroke-linecap="round"
+            stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${(C * frac).toFixed(1)}"/></svg>
+          <div class="center"><div class="title">${esc(cur.title)}</div><div class="time">${fmt12(fromMin(cur.s))} - ${fmt12(fromMin(cur.e))}</div><div class="left">${fmtDur(left)}</div><div class="faint">باقي</div></div>
+        </div>
+        ${st ? `<p style="margin:0 0 6px"><span class="st ${st}">${statusLabel(st)}</span></p>` : ''}
+        ${isGoal(cur) && st !== 'done' ? `<div class="actions">
+          <button class="btn primary wide" data-act="start" data-id="${cur.id}">ابدأ</button>
+          <button class="btn" data-act="ten" data-id="${cur.id}">10 دقائق بس</button>
+          <button class="btn" data-act="done" data-id="${cur.id}">أنجزت</button>
+          <button class="btn ghost" data-act="move" data-id="${cur.id}">اسحبه لوقت ثاني</button>
+          <button class="btn ghost" data-act="skip" data-id="${cur.id}">تخطيت</button>
+        </div>` : ''}
+        ${cur.goal === 'flex' ? `<p class="muted">وقت مرن: كمّل أي بلوك فاتك، أو مشاريع زيادة، أو ارتاح.</p>${flexPicker(k, m)}` : ''}
+        ${cur.goal === 'fixed' ? `<p class="muted">وقت الالتزامات. الأهداف مخفية لحد ${fmt12(fromMin(cur.e))}.</p>` : ''}
+      </div>`;
+      if (next) html += `<div class="card spread"><div><span class="faint">التالي</span><br><b>${esc(next.title)}</b></div><span class="muted">${fmt12(fromMin(next.s))}</span></div>`;
+    } else {
+      html += `<div class="card hero"><h2 style="margin:0">ماكو بلوك هسه</h2><p class="muted">${next ? 'التالي: ' + esc(next.title) + ' الساعة ' + fmt12(fromMin(next.s)) : 'خلص يومك. نام زين.'}</p>${flexPicker(k, m)}</div>`;
+    }
+
+    html += `<div class="card spread"><div><b>يوم أخف</b><br><span class="faint">لأيام التعب: بلوك هدف واحد (حتى 10 دقائق) يكفي للسلسلة.</span></div>
+      <button class="btn small ${light ? 'primary' : ''}" data-act="light">${light ? 'مفعّل' : 'فعّله'}</button></div>`;
+    const sl = S.sleep[k];
+    html += `<div class="card"><div class="spread"><b>نوم البارحة</b>${sl ? `<span class="chip">${sleepHours(sl).toFixed(1)} ساعة</span>` : ''}</div>
+      <div class="grid2" style="margin-top:4px"><div><label class="f">نمت</label><input type="time" id="sl-bed" value="${esc(sl ? sl.bed : S.settings.bedtime)}"></div>
+      <div><label class="f">صحيت</label><input type="time" id="sl-wake" value="${esc(sl ? sl.wake : (gymToday() ? S.settings.wakeGym : S.settings.wakeOther))}"></div></div>
+      <button class="btn small" style="margin-top:8px" data-act="sleep">${sl ? 'حدّث' : 'سجّل'}</button></div>`;
+
+    html += `<h2>اليوم كامل</h2><div class="card">${list.map(b => blockRow(b, k, m, cur)).join('')}</div>`;
+  }
+  $('#v-today').innerHTML = html;
+}
+function blockRow(b, k, m, cur) {
+  let st = b.log && b.log.status;
+  if (!st && isGoal(b) && b.e <= m) st = 'missed';
+  const moved = b.log && b.log.movedTo;
+  return `<div class="blk ${cur && cur.id === b.id ? 'now' : ''}">
+    <div class="bar" style="background:${esc(b.color)}"></div>
+    <div class="tm">${fmt12(fromMin(b.s))}</div>
+    <div class="nm"><b>${esc(b.title)}</b><span class="faint">${fmtDur(b.dur)}${moved ? ' · انسحب من ' + fmt12(b.start) : ''}</span></div>
+    ${st ? `<span class="st ${st}">${statusLabel(st)}</span>` : ''}
+    ${isGoal(b) && st !== 'done' ? `<button class="btn small ghost" data-act="row" data-id="${b.id}" aria-label="خيارات">⋯</button>` : ''}
+  </div>`;
+}
+function flexPicker(k, m) {
+  const pending = blocksFor(k).filter(b => isGoal(b) && b.e <= m && !counted(b.log));
+  if (!pending.length) return '';
+  return `<div class="row wrap2" style="justify-content:center;margin-top:8px">${pending.map(b => `<button class="btn small" data-act="moveflex" data-id="${b.id}">كمّل هسه: ${esc(b.title)}</button>`).join('')}</div>`;
+}
+function markDone(k, b, el) {
+  setLog(k, b.id, { status: 'done', startedAt: (b.log && b.log.startedAt) || fromMin(nowMin()), minutes: b.dur });
+  const nb = blocksFor(k).find(x => x.id === b.id);
+  burst('+' + blockPoints(nb), el); beep([0]); render();
+}
+
+document.addEventListener('click', e => {
+  const g = e.target.closest('[data-go]'); if (g) { go(g.dataset.go); return; }
+  const a = e.target.closest('[data-act]'); if (!a || a.closest('dialog')) return;
+  const k = todayKey(), id = a.dataset.id, act = a.dataset.act;
+  const b = id && blocksFor(k).find(x => x.id === id);
+  if (act === 'start') startTimer(b, 'full');
+  else if (act === 'ten') startTimer(b, 'ten');
+  else if (act === 'done') markDone(k, b, a);
+  else if (act === 'skip') { setLog(k, id, { status: 'skipped' }); toast('ماكو مشكلة. تكدر تكمّله بالوقت المرن.'); render(); }
+  else if (act === 'move') moveDialog(b);
+  else if (act === 'moveflex') { setLog(k, id, { movedTo: fromMin(nowMin()), status: undefined }); startTimer(blocksFor(k).find(x => x.id === id), 'full'); }
+  else if (act === 'row') rowDialog(b);
+  else if (act === 'light') { S.days[k] = { mode: S.days[k] && S.days[k].mode === 'light' ? 'normal' : 'light' }; save(); render(); }
+  else if (act === 'sleep') { const bed = $('#sl-bed').value, wake = $('#sl-wake').value; if (bed && wake) { S.sleep[k] = { bed, wake }; save(); toast('انسجل: ' + sleepHours(S.sleep[k]).toFixed(1) + ' ساعة'); render(); } }
+  else if (act === 'ics') exportICS();
+});
+function moveDialog(b) {
+  const flex = S.blocks.find(x => x.goal === 'flex' && x.days.includes(new Date().getDay()));
+  openDlg(`<h2 style="margin-top:0">اسحب "${esc(b.title)}"</h2>
+    <p class="muted">يبقى ينحسب إذا سويته بوقت ثاني بنفس اليوم.</p>
+    ${flex ? `<button class="btn primary" style="width:100%" id="mv-flex">للوقت المرن (${fmt12(flex.start)})</button>` : ''}
+    <label class="f">أو اختار وقت</label><input type="time" id="mv-t" value="${fromMin(Math.ceil((nowMin() + 15) / 15) * 15)}">
+    <div class="row" style="margin-top:12px"><button class="btn grow" id="mv-ok">اسحب</button><button class="btn ghost" id="mv-x">إلغاء</button></div>`, d => {
+    const k = todayKey();
+    const done = t => { setLog(k, b.id, { movedTo: t, status: undefined }); closeDlg(); toast('انسحب للساعة ' + fmt12(t)); render(); };
+    if (flex) d.querySelector('#mv-flex').onclick = () => done(flex.start);
+    d.querySelector('#mv-ok').onclick = () => { const t = d.querySelector('#mv-t').value; if (t) done(t); };
+    d.querySelector('#mv-x').onclick = closeDlg;
+  });
+}
+function rowDialog(b) {
+  openDlg(`<h2 style="margin-top:0">${esc(b.title)}</h2>
+    <div class="actions"><button class="btn primary wide" data-r="start">ابدأ هسه</button><button class="btn" data-r="ten">10 دقائق</button>
+    <button class="btn" data-r="done">أنجزت</button><button class="btn ghost" data-r="move">اسحب</button><button class="btn ghost" data-r="skip">تخطيت</button></div>
+    <button class="btn ghost" style="width:100%;margin-top:8px" data-r="x">إغلاق</button>`, d => {
+    d.querySelectorAll('[data-r]').forEach(r => r.onclick = () => {
+      const k = todayKey(), act = r.dataset.r; closeDlg();
+      if (act === 'start') startTimer(b, 'full');
+      else if (act === 'ten') startTimer(b, 'ten');
+      else if (act === 'done') markDone(k, b);
+      else if (act === 'skip') { setLog(k, b.id, { status: 'skipped' }); render(); }
+      else if (act === 'move') moveDialog(b);
+    });
+  });
+}
+
+/* ========== TIMER / FOCUS ========== */
+function startTimer(b, mode) {
+  if (!b) return;
+  const k = todayKey(), m = nowMin();
+  if (!b.log || !b.log.startedAt) setLog(k, b.id, { startedAt: fromMin(m) });
+  const remaining = Math.max(15, b.e - m);
+  S.active = { blockId: b.id, date: k, startTs: Date.now(), durMin: mode === 'ten' ? 10 : Math.min(remaining, b.dur), mode, prior: 0 };
+  save(); showFocus(); lockScreen(); beep([0]);
+}
+function showFocus() {
+  const a = S.active; if (!a) return;
+  const b = S.blocks.find(x => x.id === a.blockId);
+  $('#f-title').textContent = b ? b.title : '';
+  $('#f-mode').textContent = a.mode === 'ten' ? 'قاعدة الـ10 دقائق: بس ابدأ' : 'جلسة كاملة';
+  $('#focus').classList.add('on');
+  tick();
+}
+function tick() {
+  const a = S && S.active; if (!a) return;
+  const left = a.startTs + a.durMin * 60000 - Date.now();
+  if (left <= 0) { finishTimer(true); return; }
+  const s = Math.ceil(left / 1000);
+  $('#f-left').textContent = (s >= 3600 ? Math.floor(s / 3600) + ':' : '') + pad(Math.floor(s % 3600 / 60)) + ':' + pad(s % 60);
+}
+let lastMin = -1;
+setInterval(() => {
+  if (!S) return; tick();
+  const m = nowMin();
+  if (m !== lastMin) { lastMin = m; if (!S.active && !dlg.open && (view === 'today')) render(); }
+}, 1000);
+function finishTimer(natural) {
+  const a = S.active; if (!a) return;
+  const b = blocksFor(a.date).find(x => x.id === a.blockId);
+  const elapsed = Math.min(a.durMin, (Date.now() - a.startTs) / 60000) + (a.prior || 0);
+  S.active = null; save();
+  $('#focus').classList.remove('on'); unlockScreen();
+  if (natural) beep();
+  if (!b) { render(); return; }
+  if (a.mode === 'ten' && natural) {
+    setLog(a.date, b.id, { status: 'partial', minutes: Math.round(elapsed) });
+    if (a.date === todayKey() && document.visibilityState === 'visible') {
+      openDlg(`<h2 style="margin-top:0">خلصت الـ10 دقائق</h2><p class="muted">انحسبت إنجاز جزئي (+4). البداية هي الصعبة، وسويتها. تكمّل؟</p>
+        <div class="row"><button class="btn primary grow" id="c-yes">كمّل</button><button class="btn grow" id="c-no">وقف هنا</button></div>`, d => {
+        d.querySelector('#c-yes').onclick = () => {
+          closeDlg(); const m = nowMin();
+          S.active = { blockId: b.id, date: a.date, startTs: Date.now(), durMin: Math.max(15, Math.min(b.e - m, b.dur - elapsed)), mode: 'full', prior: elapsed };
+          save(); showFocus(); lockScreen();
+        };
+        d.querySelector('#c-no').onclick = () => { closeDlg(); render(); };
+      });
+    }
+    render(); return;
+  }
+  const status = (natural && a.mode === 'full') || elapsed >= b.dur * 0.8 ? 'done' : elapsed >= 10 ? 'partial' : null;
+  if (status) { setLog(a.date, b.id, { status, minutes: Math.round(elapsed) }); burst(status === 'done' ? 'أنجزت' : 'جزئي'); }
+  else toast('أقل من 10 دقائق ما تنحسب. جرّب مرة ثانية.');
+  render();
+}
+$('#f-end').onclick = () => finishTimer(false);
+
+/* ========== SCHEDULE ========== */
+function daysText(days) {
+  const nonRest = DAY_ORDER.filter(d => d !== S.settings.restDay);
+  if (nonRest.every(d => days.includes(d)) && !days.includes(S.settings.restDay)) return 'كل الأيام عدا ' + DAY_NAMES[S.settings.restDay];
+  if (days.length === 7) return 'كل يوم';
+  return DAY_ORDER.filter(d => days.includes(d)).map(d => DAY_NAMES[d]).join('، ');
+}
+function renderSchedule() {
+  const sorted = [...S.blocks].sort((a, b) => toMin(a.start) - toMin(b.start));
+  $('#v-schedule').innerHTML = `<div class="spread"><h1>الجدول</h1><button class="btn small primary" id="add-blk">+ بلوك</button></div>
+    <p class="faint">التعديل يطبّق من اليوم وجاي. بعد ما تعدّل صدّر التقويم من جديد حتى تتحدث الإشعارات.</p>
+    <div class="card">${sorted.map(b => `<div class="blk"><div class="bar" style="background:${esc(b.color)}"></div>
+      <div class="nm"><b>${esc(b.title)}</b><span class="faint">${fmt12(b.start)} - ${fmt12(b.end)} · ${esc(TYPES[b.goal])}<br>${daysText(b.days)}</span></div>
+      <button class="btn small ghost" data-edit="${b.id}">تعديل</button></div>`).join('')}</div>
+    <div class="card"><b>قواعد المرونة</b><ul class="muted" style="margin:6px 0 0;padding-inline-start:18px">
+      <li>الوقت المرن يمتص أي بلوك فات.</li><li>تكدر تسحب أي بلوك لوقت ثاني بنفس اليوم.</li>
+      <li>"يوم أخف" لأيام التعب أو المرض.</li><li>${S.settings.graceDaysPerWeek} يوم سماح بالأسبوع ما يكسر السلسلة، و${DAY_NAMES[S.settings.restDay]} حرة.</li></ul></div>`;
+  $('#add-blk').onclick = () => editBlock(null);
+  $('#v-schedule').querySelectorAll('[data-edit]').forEach(x => x.onclick = () => editBlock(x.dataset.edit));
+}
+function editBlock(id) {
+  const b = id ? S.blocks.find(x => x.id === id) : { id: 'b_' + Date.now().toString(36), title: '', goal: 'none', start: '09:00', end: '10:00', days: [...ALL], color: '#3f6fb5' };
+  openDlg(`<h2 style="margin-top:0">${id ? 'تعديل بلوك' : 'بلوك جديد'}</h2>
+    <label class="f">الاسم</label><input type="text" id="e-title" value="${esc(b.title)}" maxlength="40">
+    <label class="f">النوع</label><select id="e-goal">${Object.entries(TYPES).map(([k, v]) => `<option value="${k}" ${b.goal === k ? 'selected' : ''}>${v}</option>`).join('')}</select>
+    <div class="grid2"><div><label class="f">من</label><input type="time" id="e-start" value="${b.start}"></div><div><label class="f">إلى</label><input type="time" id="e-end" value="${b.end}"></div></div>
+    <label class="f">الأيام</label><div class="daychips">${DAY_ORDER.map(d => `<label><input type="checkbox" value="${d}" ${b.days.includes(d) ? 'checked' : ''}>${DAY_NAMES[d]}</label>`).join('')}</div>
+    <label class="f">اللون</label><input type="color" id="e-color" value="${esc(b.color)}" style="width:64px;height:40px;border:0;background:none">
+    <div class="row" style="margin-top:14px"><button class="btn primary grow" id="e-ok">حفظ</button>${id ? '<button class="btn danger" id="e-del">حذف</button>' : ''}<button class="btn ghost" id="e-x">إلغاء</button></div>`, d => {
+    d.querySelector('#e-x').onclick = closeDlg;
+    d.querySelector('#e-ok').onclick = () => {
+      const nb = { ...b, title: d.querySelector('#e-title').value.trim() || 'بلوك', goal: d.querySelector('#e-goal').value,
+        start: d.querySelector('#e-start').value, end: d.querySelector('#e-end').value, color: d.querySelector('#e-color').value,
+        days: [...d.querySelectorAll('.daychips input:checked')].map(i => +i.value) };
+      if (!nb.start || !nb.end || toMin(nb.end) <= toMin(nb.start)) { toast('وقت النهاية لازم يكون بعد البداية'); return; }
+      if (!nb.days.length) { toast('اختار يوم واحد على الأقل'); return; }
+      if (id) S.blocks[S.blocks.findIndex(x => x.id === id)] = nb; else S.blocks.push(nb);
+      markSchedChanged(); closeDlg(); render();
+    };
+    if (id) d.querySelector('#e-del').onclick = () => { if (confirm('تحذف هذا البلوك؟')) { S.blocks = S.blocks.filter(x => x.id !== id); markSchedChanged(); closeDlg(); render(); } };
+  });
+}
+
+/* ========== CYCLE ========== */
+const GYM_FIELDS = [['weight', 'الوزن (كغم)'], ['arm', 'محيط الذراع (سم)'], ['chest', 'محيط الصدر (سم)'], ['waist', 'محيط الخصر (سم)']];
+const LIFTS = [['squat', 'سكوات (كغم)'], ['bench', 'بنج (كغم)'], ['pullups', 'عقلة (تكرار)']];
+function gymInputs(prefix, v = {}) {
+  const l = v.lifts || {};
+  return `<div class="grid2">${GYM_FIELDS.map(([f, n]) => `<div><label class="f">${n}</label><input type="number" inputmode="decimal" step="0.1" id="${prefix}-${f}" value="${v[f] ?? ''}"></div>`).join('')}</div>
+    <div class="grid3">${LIFTS.map(([f, n]) => `<div><label class="f">${n}</label><input type="number" inputmode="decimal" step="0.5" id="${prefix}-l-${f}" value="${l[f] ?? ''}"></div>`).join('')}</div>`;
+}
+function readGym(prefix) {
+  const num = id => { const v = parseFloat(($('#' + id) || {}).value); return isNaN(v) ? null : v; };
+  const o = { lifts: {} }; GYM_FIELDS.forEach(([f]) => o[f] = num(prefix + '-' + f)); LIFTS.forEach(([f]) => o.lifts[f] = num(prefix + '-l-' + f)); return o;
+}
+function renderCycle() {
+  const c = currentCycle(), k = todayKey();
+  let html = `<h1>دورة الـ${S.settings.cycleDays} يوم</h1><p class="faint">الالتزام وسيلة. المقياس هو شنو طلع منك.</p>`;
+  if (!c) html += cycleSetupHTML();
+  else if (k >= c.end) html += cycleResultHTML(c);
+  else {
+    const total = daysBetween(c.start, c.end), day = daysBetween(c.start, k) + 1, comp = cycleCompliance(c);
+    const book = S.books.find(x => x.id === c.targets.bookId);
+    html += `<div class="card"><div class="spread"><b>اليوم ${day} من ${total}</b><span class="chip">النتيجة ${fmtDate(c.end)}</span></div>
+      <div class="pbar" style="margin-top:10px"><i style="width:${Math.min(100, day / total * 100)}%"></i></div></div>
+      <div class="card"><b>أهدافك لهالدورة</b>
+      <table class="res" style="margin-top:6px">
+        <tr><td>الكتاب</td><td>${book ? esc(book.title) + ` (${book.read}/${book.pages})` : '-'}</td></tr>
+        <tr><td>المشروع</td><td>${esc(c.targets.project) || '-'}</td></tr>
+        <tr><td>كلاود</td><td>${esc(c.targets.claude) || '-'}</td></tr>
+        <tr><td>الجيم</td><td>${c.gymStart && c.gymStart.lifts && c.gymStart.lifts.bench != null ? 'بنج ' + c.gymStart.lifts.bench + ' كغم بالبداية' : 'قياس البداية محفوظ'}</td></tr>
+      </table></div>
+      ${book ? `<div class="card"><b>تقدم الكتاب</b><div class="row" style="margin-top:8px"><input type="number" inputmode="numeric" id="bk-read" min="0" value="${book.read}"><button class="btn small" id="bk-save">حدّث الصفحات</button></div>
+        <div class="pbar" style="margin-top:10px"><i style="width:${book.pages ? Math.min(100, book.read / book.pages * 100) : 0}%"></i></div>
+        ${book.pages ? `<p class="faint" style="margin:6px 0 0">حتى تخلصه تحتاج ${Math.max(0, Math.ceil((book.pages - book.read) / Math.max(1, daysBetween(k, c.end))))} صفحة باليوم.</p>` : ''}</div>` : ''}
+      <div class="card"><b>الالتزام لحد هسه</b><p class="muted" style="margin:4px 0 0">${comp.pct}% من بلوكات الأهداف (${comp.done}/${comp.sched})${comp.sleep ? ' · معدل النوم ' + comp.sleep.toFixed(1) + ' س' : ''}</p></div>
+      <button class="btn ghost" style="width:100%;margin-bottom:12px" id="cy-early">افتح النتيجة هسه</button>`;
+  }
+  html += projectsHTML() + pastCyclesHTML();
+  $('#v-cycle').innerHTML = html;
+  bindCycle(c);
+}
+function cycleSetupHTML() {
+  const prev = S.cycles[S.cycles.length - 1];
+  return `<div class="card"><b>حدد شنو لازم يطلع منك بعد ${S.settings.cycleDays} يوم</b><p class="faint">خليها أهداف صغيرة تنجز بأسبوعين. الهدف الكبير يكسر الحماس.</p>
+    <label class="f">الكتاب (عنوانه وعدد صفحاته)</label><div class="grid2"><input type="text" id="cs-book" placeholder="اسم الكتاب"><input type="number" inputmode="numeric" id="cs-pages" placeholder="الصفحات"></div>
+    <label class="f">ناتج مشروع واحد يخلص ويشتغل</label><input type="text" id="cs-project" placeholder="مثلاً: المرحلة 1 من تطبيق يومي شغالة على موبايلي">
+    <label class="f">شي واحد تبنيه بكلاود وتكدر تورّيه لأحد</label><input type="text" id="cs-claude" placeholder="مثلاً: سكربت يرتب ملفاتي">
+    <label class="f" style="margin-top:14px"><b>قياسات الجيم اليوم</b></label>${gymInputs('gs', prev && prev.gymEnd ? prev.gymEnd : {})}
+    <p class="faint">العضلات ما تكبر بشكل واضح بـ14 يوم، بس القوة تزيد أسرع. المحيط قارنه كل دورتين.</p>
+    <button class="btn primary" style="width:100%;margin-top:8px" id="cs-go">ابدأ الدورة</button></div>`;
+}
+function cycleResultHTML(c) {
+  const book = S.books.find(x => x.id === c.targets.bookId), comp = cycleCompliance(c);
+  const yn = id => `<select id="${id}"><option value="1">نعم</option><option value="0">لا</option></select>`;
+  return `<div class="card"><b>يوم النتيجة</b><p class="faint">جاوب بصدق. الرابط والرقم أقوى من "نعم".</p>
+    <label class="f">${book ? esc(book.title) : 'الكتاب'}: خلصته؟</label>
+    <div class="grid2">${yn('cr-book')}<input type="number" inputmode="numeric" id="cr-pages" value="${book ? book.read : 0}" placeholder="الصفحات المقروءة"></div>
+    <label class="f">شنو أهم فكرة طلعت بيها؟</label><input type="text" id="cr-idea">
+    <label class="f">${esc(c.targets.project) || 'المشروع'}: انتهى؟</label>
+    <div class="grid2">${yn('cr-proj')}<input type="text" id="cr-link" placeholder="رابط أو ملاحظة"></div>
+    <label class="f">${esc(c.targets.claude) || 'كلاود'}: سويته؟</label>
+    <div class="grid2">${yn('cr-claude')}<input type="text" id="cr-learn" placeholder="شنو تعلمت جديد"></div>
+    <label class="f" style="margin-top:14px"><b>قياسات الجيم اليوم</b></label>${gymInputs('ge')}
+    <p class="muted" style="margin-top:10px">الالتزام: ${comp.pct}% من البلوكات${comp.sleep ? ' · معدل النوم ' + comp.sleep.toFixed(1) + ' س' : ''} · أفضل سلسلة ${bestStreak()} يوم</p>
+    <label class="f">شنو نفع؟</label><textarea id="cr-w"></textarea>
+    <label class="f">شنو ما نفع؟</label><textarea id="cr-d"></textarea>
+    <label class="f">شنو يتغيّر بالجدول للدورة الجاية؟</label><textarea id="cr-c"></textarea>
+    <button class="btn primary" style="width:100%;margin-top:10px" id="cr-go">اعرض النتيجة واختم الدورة</button></div>`;
+}
+function diffCell(a, b, lowerBetter) {
+  if (b == null) return '-';
+  if (a == null) return String(b);
+  const d = +(b - a).toFixed(1); if (!d) return `${b} <span class="faint">(بدون تغيير)</span>`;
+  const good = lowerBetter ? d < 0 : d > 0;
+  return `${b} <span class="diff ${good ? 'up' : 'down'}" dir="ltr">(${d > 0 ? '+' : ''}${d})</span>`;
+}
+function resultTable(c) {
+  const r = c.results || {}, s = c.gymStart || {}, e = c.gymEnd || {}, sl = s.lifts || {}, el = e.lifts || {};
+  const yn = v => v ? '<span class="diff up">نعم</span>' : '<span class="diff down">لا</span>';
+  return `<table class="res">
+    <tr><td>الكتاب</td><td>${yn(r.bookDone)} · ${r.pagesRead || 0} صفحة</td></tr>
+    <tr><td>المشروع</td><td>${yn(r.projectDone)}${r.projectLink ? '<br><span class="faint">' + esc(r.projectLink) + '</span>' : ''}</td></tr>
+    <tr><td>كلاود</td><td>${yn(r.claudeDone)}${r.claudeLearned ? '<br><span class="faint">' + esc(r.claudeLearned) + '</span>' : ''}</td></tr>
+    ${LIFTS.map(([f, n]) => `<tr><td>${n}</td><td>${diffCell(sl[f], el[f], false)}</td></tr>`).join('')}
+    ${GYM_FIELDS.map(([f, n]) => `<tr><td>${n}</td><td>${diffCell(s[f], e[f], f === 'waist')}</td></tr>`).join('')}
+    <tr><td>الالتزام</td><td>${r.compliance ?? '-'}%</td></tr>
+  </table>`;
+}
+function pastCyclesHTML() {
+  const done = S.cycles.filter(c => c.closed).reverse();
+  if (!done.length) return '';
+  return `<h2>الدورات السابقة</h2>` + done.map(c => `<details class="card"><summary><b>دورة ${S.cycles.indexOf(c) + 1}</b> <span class="faint">${fmtDate(c.start)} ← ${fmtDate(c.end)}</span></summary>
+    <div style="margin-top:8px">${resultTable(c)}${c.reflection && c.reflection.change ? `<p class="muted"><b>التغيير:</b> ${esc(c.reflection.change)}</p>` : ''}</div></details>`).join('');
+}
+function projectsHTML() {
+  return `<h2>المشاريع والكتب</h2><div class="card">
+    ${S.projects.map(p => `<div style="margin-bottom:12px"><div class="spread"><b>${esc(p.name)}</b><button class="btn small ghost" data-pdel="${p.id}">حذف</button></div>
+      ${p.tasks.map((t, i) => `<label class="row" style="margin:4px 0"><input type="checkbox" data-task="${p.id}:${i}" ${t.done ? 'checked' : ''}> <span ${t.done ? 'style="text-decoration:line-through;opacity:.6"' : ''}>${esc(t.text)}</span></label>`).join('')}
+      <div class="row"><input type="text" placeholder="مهمة صغيرة" data-tin="${p.id}"><button class="btn small" data-tadd="${p.id}">+</button></div></div>`).join('')}
+    <div class="row"><input type="text" id="p-new" placeholder="مشروع جديد"><button class="btn small" id="p-add">أضف</button></div></div>
+    <div class="card">${S.books.length ? S.books.map(b => `<div class="goalrow"><div class="spread"><span>${esc(b.title)}</span><span class="faint">${b.read}/${b.pages}</span></div><div class="pbar"><i style="width:${b.pages ? Math.min(100, b.read / b.pages * 100) : 0}%"></i></div></div>`).join('') : '<span class="faint">الكتب تنضاف من إعداد الدورة.</span>'}</div>`;
+}
+function bindCycle(c) {
+  const el = $('#v-cycle');
+  const on = (sel, fn) => { const x = el.querySelector(sel); if (x) x.onclick = fn; };
+  on('#cs-go', () => {
+    const title = $('#cs-book').value.trim(), pages = parseInt($('#cs-pages').value) || 0;
+    const project = $('#cs-project').value.trim(), claude = $('#cs-claude').value.trim();
+    if (!title && !project && !claude) { toast('حط هدف واحد على الأقل'); return; }
+    let bookId = null;
+    if (title) { bookId = 'k_' + Date.now().toString(36); S.books.push({ id: bookId, title, pages, read: 0 }); }
+    const start = todayKey();
+    S.cycles.push({ id: 'c_' + Date.now().toString(36), start, end: addDays(start, S.settings.cycleDays), closed: false,
+      targets: { bookId, project, claude }, gymStart: readGym('gs'), gymEnd: null, results: null, reflection: null });
+    save(); toast('بدت الدورة. بالتوفيق!');
+    if (S.settings.calendarExportedAt) markSchedChanged();
+    render();
+  });
+  on('#bk-save', () => { const b = S.books.find(x => x.id === c.targets.bookId); b.read = Math.max(0, Math.min(b.pages || 1e9, parseInt($('#bk-read').value) || 0)); save(); toast('تحدّث'); render(); });
+  on('#cy-early', () => { if (confirm('تفتح النتيجة قبل وقتها؟ الدورة راح تنختم اليوم.')) { c.end = todayKey(); save(); render(); } });
+  on('#cr-go', () => {
+    const book = S.books.find(x => x.id === c.targets.bookId);
+    const pages = parseInt($('#cr-pages').value) || 0; if (book) book.read = Math.max(book.read, pages);
+    c.results = { bookDone: $('#cr-book').value === '1', pagesRead: pages, idea: $('#cr-idea').value.trim(), projectDone: $('#cr-proj').value === '1',
+      projectLink: $('#cr-link').value.trim(), claudeDone: $('#cr-claude').value === '1', claudeLearned: $('#cr-learn').value.trim(), compliance: cycleCompliance(c).pct };
+    c.gymEnd = readGym('ge');
+    c.reflection = { worked: $('#cr-w').value.trim(), didnt: $('#cr-d').value.trim(), change: $('#cr-c').value.trim() };
+    c.closed = true; c.end = todayKey(); save();
+    render();
+    openDlg(`<h2 style="margin-top:0">نتيجة الدورة</h2>${resultTable(c)}<button class="btn primary" style="width:100%;margin-top:12px" id="r-next">حدد أهداف الدورة الجاية</button>`, d => {
+      d.querySelector('#r-next').onclick = () => { closeDlg(); render(); };
+    });
+  });
+  on('#p-add', () => { const n = $('#p-new').value.trim(); if (n) { S.projects.push({ id: 'p_' + Date.now().toString(36), name: n, tasks: [] }); save(); render(); } });
+  el.querySelectorAll('[data-tadd]').forEach(b => b.onclick = () => { const inp = el.querySelector(`[data-tin="${b.dataset.tadd}"]`); const t = inp.value.trim(); if (t) { S.projects.find(p => p.id === b.dataset.tadd).tasks.push({ text: t, done: false }); save(); render(); } });
+  el.querySelectorAll('[data-task]').forEach(cb => cb.onchange = () => { const [pid, i] = cb.dataset.task.split(':'); const p = S.projects.find(x => x.id === pid); p.tasks[+i].done = cb.checked; save(); render(); });
+  el.querySelectorAll('[data-pdel]').forEach(b => b.onclick = () => { if (confirm('تحذف المشروع؟')) { S.projects = S.projects.filter(p => p.id !== b.dataset.pdel); save(); render(); } });
+}
+
+/* ========== PROGRESS ========== */
+function renderProgress() {
+  const k = todayKey(), wk = weekKey(k), pts = totalPoints(), lvl = Math.floor(pts / 500) + 1;
+  const counts = { gym: 0, claude: 0, projects: 0, reading: 0 };
+  for (let d = wk; d <= k; d = addDays(d, 1)) for (const b of blocksFor(d)) if (isGoal(b) && counted(b.log)) counts[b.goal]++;
+  const days7 = []; for (let i = 6; i >= 0; i--) { const d = addDays(k, -i); const all = blocksFor(d).filter(isGoal); days7.push({ d, pct: all.length ? goalCountDone(d) / all.length : 0, rest: isRestDay(d) }); }
+  const sl = []; for (let i = 0; i < 7; i++) { const s = S.sleep[addDays(k, -i)]; if (s) sl.push(sleepHours(s)); }
+  const avgSleep = sl.length ? sl.reduce((a, b) => a + b, 0) / sl.length : null;
+  $('#v-progress').innerHTML = `<h1>التقدم</h1>
+    <div class="stats"><div class="stat"><b>${computeStreak()}</b><span>السلسلة</span></div><div class="stat"><b>${bestStreak()}</b><span>أفضل سلسلة</span></div><div class="stat"><b>${pts}</b><span>نقاط · مستوى ${lvl}</span></div></div>
+    <div class="card"><b>هذا الأسبوع</b>${Object.entries(GOALS).map(([g, n]) => { const goal = S.settings.weeklyGoals[g] || 1; return `<div class="goalrow"><div class="spread"><span>${n}</span><span class="faint">${counts[g]}/${goal}</span></div><div class="pbar"><i data-w="${Math.min(100, counts[g] / goal * 100)}"></i></div></div>`; }).join('')}</div>
+    <div class="card"><b>آخر 7 أيام</b> <span class="faint">نسبة بلوكات الأهداف المنجزة</span><div class="bars7">${days7.map(x => `<div title="${x.d}"><i data-h="${x.rest ? 0 : Math.round(x.pct * 100)}"></i></div>`).join('')}</div>
+      <div class="bars7lbl">${days7.map(x => `<span>${DAY_SHORT[parseKey(x.d).getDay()]}</span>`).join('')}</div></div>
+    <div class="card"><div class="spread"><b>النوم آخر 7 أيام</b><span class="chip">${avgSleep ? 'معدل ' + avgSleep.toFixed(1) + ' س' : 'ماكو تسجيل'}</span></div>
+      ${avgSleep && avgSleep < 6.5 ? '<p class="muted" style="margin:6px 0 0">أقل من 6.5 ساعة. النوم أول شي ينكسر بيه الجدول. قدّم وقت النوم، لا تأخّر الصحيان.</p>' : ''}</div>
+    <p class="faint">النقاط مؤشر التزام بس. التقدم الحقيقي تشوفه بنتيجة الدورة.</p>`;
+  requestAnimationFrame(() => {
+    document.querySelectorAll('#v-progress [data-w]').forEach(i => i.style.width = i.dataset.w + '%');
+    document.querySelectorAll('#v-progress [data-h]').forEach(i => i.style.height = i.dataset.h + '%');
+  });
+}
+
+/* ========== SETTINGS ========== */
+function renderSettings() {
+  const st = S.settings;
+  $('#v-settings').innerHTML = `<h1>الإعدادات</h1>
+    <div class="card"><b>الإشعارات (ملف التقويم)</b>
+      <p class="muted" style="margin:6px 0">التطبيق ما يكدر يطلع إشعار وهو مسكّر. فيطلّع ملف تقويم فيه كل بلوك مع تنبيه بوقته، وتذكير نوم الساعة ${fmt12(st.sleepReminder)}. تستورده مرة وحدة وتوصلك الإشعارات من الموبايل نفسه.</p>
+      <button class="btn primary" style="width:100%" data-act="ics">صدّر ملف التقويم (.ics)</button>
+      <p class="faint" style="margin-top:6px">${st.calendarExportedAt ? 'آخر تصدير: ' + new Date(st.calendarExportedAt).toLocaleString('ar-IQ-u-nu-latn') : 'ما تصدّر بعد'}</p>
+      <details><summary class="muted">شلون أستورده؟</summary><ul class="muted" style="padding-inline-start:18px">
+        <li><b>آيفون:</b> افتح الملف من سفاري، اضغط "إضافة الكل"، واختار تقويم جديد اسمه "الجدول". إذا تعدّل الجدول احذف تقويم "الجدول" وأضف الملف الجديد.</li>
+        <li><b>أندرويد:</b> افتح الملف بتطبيق Google Calendar، أو من calendar.google.com: الإعدادات ← استيراد. وتأكد إشعارات التقويم مفعّلة.</li></ul></details></div>
+    <div class="card"><b>دليل وضع Focus</b><ul class="muted" style="padding-inline-start:18px;margin:6px 0 0">
+      <li><b>آيفون:</b> الإعدادات ← Focus ← + ← مخصص "دراسة". اسمح بس للتقويم والمكالمات المهمة، وجدوله 7:30-12:30 و1:30-2:30 م. وFocus النوم من 10:00 م لـ5:00 ص.</li>
+      <li><b>أندرويد:</b> الإعدادات ← Digital Wellbeing ← Focus mode. اختار التطبيقات المشتتة وجدوله بنفس الأوقات، وفعّل Bedtime mode للنوم.</li></ul></div>
+    <div class="card"><b>النوم والأيام</b>
+      <div class="grid3"><div><label class="f">النوم</label><input type="time" id="s-bed" value="${st.bedtime}"></div><div><label class="f">صحيان الجيم</label><input type="time" id="s-wg" value="${st.wakeGym}"></div><div><label class="f">صحيان الباقي</label><input type="time" id="s-wo" value="${st.wakeOther}"></div></div>
+      <div class="grid2"><div><label class="f">تذكير النوم</label><input type="time" id="s-rem" value="${st.sleepReminder}"></div><div><label class="f">يوم الراحة</label><select id="s-rest">${DAY_ORDER.map(d => `<option value="${d}" ${st.restDay === d ? 'selected' : ''}>${DAY_NAMES[d]}</option>`).join('')}</select></div></div>
+      <div class="grid2"><div><label class="f">أيام سماح بالأسبوع</label><input type="number" min="0" max="3" id="s-grace" value="${st.graceDaysPerWeek}"></div><div><label class="f">طول الدورة (يوم)</label><input type="number" min="7" max="30" id="s-cyc" value="${st.cycleDays}"></div></div>
+      <label class="f">أهداف الأسبوع (عدد الأيام)</label><div class="grid2">${Object.entries(GOALS).map(([g, n]) => `<div><label class="f">${n}</label><input type="number" min="0" max="7" data-wg="${g}" value="${st.weeklyGoals[g] ?? 0}"></div>`).join('')}</div>
+      <button class="btn" style="width:100%;margin-top:10px" id="s-save">حفظ</button></div>
+    <div class="card"><b>المظهر</b><div class="row wrap2" style="margin-top:8px">
+      <button class="btn small ${st.theme === 'dark' ? 'primary' : ''}" data-theme-set="dark">داكن</button><button class="btn small ${st.theme === 'light' ? 'primary' : ''}" data-theme-set="light">فاتح</button>
+      <button class="btn small ${st.sound ? 'primary' : ''}" id="s-sound">الصوت ${st.sound ? 'شغّال' : 'مطفي'}</button>
+      <button class="btn small ${st.motion !== false ? 'primary' : ''}" id="s-motion">الحركة ${st.motion !== false ? 'شغّالة' : 'مطفية'}</button></div></div>
+    <div class="card"><b>البيانات</b><p class="faint">كل شي محفوظ بس على هذا الجهاز. صدّر نسخة كل أسبوع، لأن مسح بيانات المتصفح يمسحها.</p>
+      <div class="row wrap2"><button class="btn small" id="d-exp">تصدير JSON</button><label class="btn small" style="display:inline-flex;align-items:center">استيراد JSON<input type="file" accept="application/json,.json" id="d-imp" hidden></label>
+      <button class="btn small danger" id="d-reset">مسح كل البيانات</button></div></div>
+    <p class="faint" style="text-align:center">يومي · بدون حساب، بدون تتبع، يشتغل بدون إنترنت</p>`;
+  const el = $('#v-settings');
+  el.querySelector('#s-save').onclick = () => {
+    const before = JSON.stringify([st.sleepReminder, st.restDay]);
+    st.bedtime = $('#s-bed').value || st.bedtime; st.wakeGym = $('#s-wg').value || st.wakeGym; st.wakeOther = $('#s-wo').value || st.wakeOther;
+    st.sleepReminder = $('#s-rem').value || st.sleepReminder; st.restDay = +$('#s-rest').value;
+    st.graceDaysPerWeek = Math.max(0, Math.min(3, parseInt($('#s-grace').value) || 0)); st.cycleDays = Math.max(7, Math.min(30, parseInt($('#s-cyc').value) || 14));
+    el.querySelectorAll('[data-wg]').forEach(i => st.weeklyGoals[i.dataset.wg] = Math.max(0, Math.min(7, parseInt(i.value) || 0)));
+    if (before !== JSON.stringify([st.sleepReminder, st.restDay])) markSchedChanged(); else save();
+    toast('انحفظ');
+  };
+  el.querySelectorAll('[data-theme-set]').forEach(b => b.onclick = () => { st.theme = b.dataset.themeSet; save(); render(); });
+  el.querySelector('#s-sound').onclick = () => { st.sound = !st.sound; save(); render(); };
+  el.querySelector('#s-motion').onclick = () => { st.motion = st.motion === false; save(); render(); };
+  el.querySelector('#d-exp').onclick = () => download('yawmi-backup-' + todayKey() + '.json', JSON.stringify(S, null, 2), 'application/json');
+  el.querySelector('#d-imp').onchange = async e => {
+    const f = e.target.files[0]; if (!f) return;
+    try {
+      const data = JSON.parse(await f.text()); if (!data || !Array.isArray(data.blocks) || !data.settings) throw 0;
+      if (!confirm('الاستيراد يستبدل كل البيانات الحالية. تكمّل؟')) return;
+      S = mergeState(data); S.active = null; save(); toast('رجعت كل البيانات'); render();
+    } catch { toast('الملف مو نسخة صحيحة من يومي'); }
+  };
+  el.querySelector('#d-reset').onclick = () => { if (confirm('تمسح كل شي؟ ما يرجع إلا من ملف تصدير.') && confirm('متأكد؟')) { S = defaultState(); save(); render(); toast('انمسح'); } };
+}
+function download(name, text, type) {
+  const blob = new Blob([text], { type }); const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+}
+
+/* ========== ICS export ========== */
+function icsEscape(s) { return String(s).replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\n/g, '\\n'); }
+function icsFold(line) {
+  // fold at <=75 octets without splitting a UTF-8 character
+  const enc = new TextEncoder(); const out = []; let cur = '', bytes = 0, limit = 75;
+  for (const ch of line) { const n = enc.encode(ch).length; if (bytes + n > limit) { out.push(cur); cur = ' '; bytes = 1; limit = 75; } cur += ch; bytes += n; }
+  out.push(cur); return out.join('\r\n');
+}
+const BYDAY = ['SU','MO','TU','WE','TH','FR','SA'];
+const icsDate = (k, t) => k.replace(/-/g, '') + 'T' + t.replace(':', '') + '00';
+function nextDateFor(days) { let k = todayKey(); for (let i = 0; i < 7; i++) { if (days.includes(parseKey(k).getDay())) return k; k = addDays(k, 1); } return todayKey(); }
+function buildICS() {
+  const st = S.settings;
+  const stamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+/, '');
+  const L = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//yawmi//ar', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', 'X-WR-CALNAME:' + icsEscape('الجدول')];
+  const ev = (uid, k, start, end, rrule, title, desc) => {
+    L.push('BEGIN:VEVENT', 'UID:' + uid + '@yawmi', 'DTSTAMP:' + stamp, 'DTSTART:' + icsDate(k, start), 'DTEND:' + icsDate(k, end));
+    if (rrule) L.push(rrule);
+    L.push('SUMMARY:' + icsEscape(title));
+    if (desc) L.push('DESCRIPTION:' + icsEscape(desc));
+    L.push('BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:' + icsEscape(title), 'TRIGGER:PT0M', 'END:VALARM', 'END:VEVENT');
+  };
+  for (const b of S.blocks) {
+    if (b.goal === 'fixed') continue;
+    const days = b.days.filter(d => d !== st.restDay); if (!days.length) continue;
+    ev(b.id, nextDateFor(days), b.start, b.end, 'RRULE:FREQ=WEEKLY;BYDAY=' + days.map(d => BYDAY[d]).join(','), b.title, isGoal(b) ? 'افتح يومي واضغط ابدأ. إذا صعبة: 10 دقائق بس.' : '');
+  }
+  ev('sleep-reminder', todayKey(), st.sleepReminder, fromMin(toMin(st.sleepReminder) + 15), 'RRULE:FREQ=DAILY', 'تذكير النوم', 'نص ساعة للنوم. اشحن الموبايل بعيد.');
+  const c = currentCycle();
+  if (c) ev('cycle-' + c.id, c.end, '21:15', '21:30', '', 'يوم نتيجة الدورة', 'افتح يومي وشوف شنو طلع منك بالدورة.');
+  L.push('END:VCALENDAR');
+  return L.map(icsFold).join('\r\n') + '\r\n';
+}
+function exportICS() {
+  download('yawmi-schedule.ics', buildICS(), 'text/calendar;charset=utf-8');
+  S.settings.calendarExportedAt = new Date().toISOString(); save(); toast('تصدّر. افتح الملف وأضفه لتقويمك.'); render();
+}
+
+/* ========== boot ========== */
+function mergeState(saved) {
+  const d = defaultState();
+  return { ...d, ...saved, settings: { ...d.settings, ...(saved.settings || {}), weeklyGoals: { ...d.settings.weeklyGoals, ...((saved.settings || {}).weeklyGoals || {}) } } };
+}
+(async () => {
+  await DB.open();
+  const saved = await DB.get('state');
+  S = saved ? mergeState(saved) : defaultState();
+  if (!saved) save();
+  try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch {}
+  render();
+  if (S.active) {
+    if (Date.now() > S.active.startTs + S.active.durMin * 60000) finishTimer(true);
+    else { showFocus(); lockScreen(); }
+  }
+  if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('sw.js').catch(() => {});
+})();
+</script>
+</body>
+</html>
